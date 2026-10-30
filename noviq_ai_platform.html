@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>NoviQ AI — Multi-Page SaaS EdTech Platform</title>
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Noto+Sans+Arabic:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#e6fdf8',
+              100: '#b3f7e8',
+              400: '#00d6a4',
+              500: '#00c49a',
+              600: '#00a37e',
+              900: '#02382c',
+            },
+            dark: {
+              bg: '#070b19',
+              panel: '#0e142b',
+              panel2: '#151c38',
+              border: 'rgba(255, 255, 255, 0.09)'
+            },
+            light: {
+              bg: '#f3f6fc',
+              panel: '#ffffff',
+              panel2: '#eef2f9',
+              border: 'rgba(0, 0, 0, 0.08)'
+            }
+          },
+          fontFamily: {
+            ar: ['Cairo', 'Noto Sans Arabic', 'sans-serif'],
+            en: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(120, 140, 180, 0.25); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(120, 140, 180, 0.45); }
+
+    .prose code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875em;
+      background: rgba(0, 196, 154, 0.12);
+      color: #00d6a4;
+      padding: 0.2em 0.45em;
+      border-radius: 0.375rem;
+      direction: ltr;
+      display: inline-block;
+    }
+    .dark .prose pre {
+      background: #050814;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .light .prose pre {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .prose pre {
+      border-radius: 0.85rem;
+      padding: 1.1rem;
+      overflow-x: auto;
+      direction: ltr;
+      text-align: left;
+      margin: 1rem 0;
+    }
+    .prose pre code {
+      background: none;
+      color: #e2e8f0;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .prose h2 { font-size: 1.35rem; font-weight: 800; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    .prose h3 { font-size: 1.1rem; font-weight: 700; margin-top: 1.2rem; margin-bottom: 0.4rem; color: #00d6a4; }
+    .prose p { margin-bottom: 0.75rem; line-height: 1.8; }
+    .prose ul { list-style-type: disc; padding-inline-start: 1.5rem; margin-bottom: 0.75rem; }
+  </style>
+
+  <!-- Firebase Modular Imports & Config -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+    import { 
+      getAuth, 
+      signInAnonymously, 
+      signInWithPopup, 
+      GoogleAuthProvider, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const appId = "noviq-ai-d43c0";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZ3JJwZSDuzfaZhuCG63yzva_ILlCzL1o",
+      authDomain: "noviq-ai-d43c0.firebaseapp.com",
+      projectId: "noviq-ai-d43c0",
+      storageBucket: "noviq-ai-d43c0.firebasestorage.app",
+      messagingSenderId: "1067646790188",
+      appId: "1:1067646790188:web:344d9aa8d9aadd1d917f89",
+      measurementId: "G-Y7JFTP94C4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    window.FB = {
+      appId,
+      auth,
+      db,
+      doc,
+      setDoc,
+      getDoc,
+      collection,
+      addDoc,
+      onSnapshot,
+      signInAnonymously,
+      signInWithPopup,
+      googleProvider,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    };
+
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
+</head>
+
+<body class="bg-dark-bg text-slate-200 font-ar antialiased min-h-screen transition-colors duration-300">
+
+  <div id="app" class="flex flex-col min-h-screen">
+    
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-40 bg-dark-panel/90 backdrop-blur-md border-b border-dark-border px-4 py-3">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        
+        <!-- Brand / Logo -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="window.NoviQ.navigate('landing')">
+          <div class="w-10 h-10 rounded-2xl bg-brand-500/20 border border-brand-500 text-brand-400 flex items-center justify-center font-black text-xl shadow-lg shadow-brand-500/10">
+            N
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-white text-lg tracking-tight">NoviQ <span class="text-brand-400 text-xs px-2 py-0.5 rounded-md bg-brand-500/10 border border-brand-500/20">AI</span></span>
+            </div>
+            <span class="hidden sm:block text-[11px] text-slate-400 -mt-0.5" id="sub-logo-text">منصة التعلم التكيفي الذكية</span>
+          </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1 font-bold text-xs text-slate-300">
+          <button onclick="window.NoviQ.navigate('landing')" class="px-3 py-1.5 rounded-xl hover:bg-dark-panel2 transition-all">الرئيسية (Landing)</button>
+          <button onclick="window.NoviQ.navigate('dashboard')" class="px-3 py-1.5 rounded-xl hover:bg-dark-panel2 transition-all">لوحة التعلم</button>
+          <button onclick="window.NoviQ.navigate('plan')" class="px-3 py-1.5 rounded-xl hover:bg-dark-panel2 transition-all">المسار الدراسي</button>
+          <button onclick="window.NoviQ.navigate('practice')" class="px-3 py-1.5 rounded-xl hover:bg-dark-panel2 transition-all">التدريب وسجل الأخطاء</button>
+          <button onclick="window.NoviQ.navigate('tutor')" class="px-3 py-1.5 rounded-xl hover:bg-dark-panel2 transition-all">المعلم الذكي</button>
+          <button onclick="window.NoviQ.navigate('research')" class="px-3 py-1.5 rounded-xl hover:bg-dark-panel2 text-indigo-400 transition-all">مشكلة البحث 📊</button>
+        </nav>
+
+        <!-- Right Action Controls -->
+        <div class="flex items-center gap-2">
+          <div id="auth-header-btn-wrap">
+            <button onclick="window.NoviQ.openAuthModal()" class="px-3.5 py-1.5 rounded-xl bg-brand-500 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-md hover:bg-brand-400 transition-all">
+              <span>👤</span>
+              <span id="btn-auth-header-text">تسجيل الدخول</span>
+            </button>
+          </div>
+
+          <button onclick="window.NoviQ.openApiModal()" class="p-2 rounded-xl bg-dark-panel2 border border-dark-border text-brand-400 text-xs" title="API Settings">
+            ⚙️
+          </button>
+
+          <button onclick="window.NoviQ.toggleTheme()" class="p-2 rounded-xl bg-dark-panel2 border border-dark-border text-slate-300 transition-all text-xs">
+            <span id="theme-btn-icon">🌙</span>
+          </button>
+
+          <button onclick="window.NoviQ.toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-dark-panel2 border border-dark-border text-xs font-bold text-slate-200 transition-all">
+            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
+            <span id="lang-btn-text">English</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- PAGE CONTAINER -->
+    <main id="view-root" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-dark-border bg-dark-panel py-6 px-4 text-center text-xs text-slate-400">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>© 2026 NoviQ AI — EdTech Research Project. All rights reserved.</div>
+        <div class="flex items-center gap-4 font-bold">
+          <button onclick="window.NoviQ.navigate('landing')" class="hover:text-white">الرئيسية</button>
+          <button onclick="window.NoviQ.navigate('research')" class="hover:text-white text-indigo-400">مشكلة البحث والرؤية</button>
+          <button onclick="window.NoviQ.openApiModal()" class="hover:text-white text-brand-400">إعدادات الذكاء الاصطناعي</button>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-dark-panel border border-dark-border rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-6 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-dark-border pb-4">
+        <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+          <span>🔐</span>
+          <span id="auth-modal-title">تسجيل الدخول إلى NoviQ AI</span>
+        </h2>
+        <button onclick="window.NoviQ.closeAuthModal()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
+      </div>
+
+      <button onclick="window.NoviQ.signInWithGoogle()" class="w-full py-3 px-4 rounded-xl bg-white text-slate-900 font-bold text-sm flex items-center justify-center gap-3 hover:bg-slate-100 transition-all shadow-md">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span id="btn-google-text">تسجيل الدخول عبر Google</span>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <hr class="flex-1 border-dark-border">
+        <span class="text-xs text-slate-500 font-bold">أو البريد الإلكتروني</span>
+        <hr class="flex-1 border-dark-border">
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">البريد الإلكتروني:</label>
+          <input type="email" id="auth-email-input" placeholder="user@domain.com" class="w-full px-4 py-3 rounded-xl bg-dark-panel2 border border-dark-border text-white text-sm focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">كلمة المرور:</label>
+          <input type="password" id="auth-pass-input" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-dark-panel2 border border-dark-border text-white text-sm focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div id="auth-error-msg" class="hidden text-xs text-red-400 p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 font-medium"></div>
+
+        <div class="flex gap-2">
+          <button onclick="window.NoviQ.signInWithEmail(false)" class="flex-1 py-3 rounded-xl bg-brand-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-brand-500/20">تسجيل الدخول</button>
+          <button onclick="window.NoviQ.signInWithEmail(true)" class="flex-1 py-3 rounded-xl bg-dark-panel2 border border-dark-border text-slate-200 font-bold text-xs">إنشاء حساب</button>
+        </div>
+      </div>
+
+      <div class="border-t border-dark-border pt-4 flex justify-between items-center text-xs">
+        <button onclick="window.NoviQ.closeAuthModal()" class="text-slate-400 hover:text-white">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API KEY MODAL -->
+  <div id="api-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-dark-panel border border-dark-border rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-6 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-dark-border pb-4">
+        <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+          <span>⚙️</span>
+          <span>إعدادات محرك الذكاء الاصطناعي</span>
+        </h2>
+        <button onclick="window.NoviQ.closeApiModal()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed">
+        تستخدم المنصة محرك Gemini 3 Flash تلقائياً. يمكنك إضافة مفتاح الـ API الخاص بك لمنع أي قيود سرعة!
+      </p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-2">اختر المحرك:</label>
+          <select id="api-provider-select" class="w-full px-4 py-3 rounded-xl bg-dark-panel2 border border-dark-border text-white text-sm focus:outline-none focus:border-brand-500">
+            <option value="gemini">Google Gemini 3 Flash (المدمج / API Key)</option>
+            <option value="openai">OpenAI API (GPT-4o)</option>
+            <option value="anthropic">Anthropic API (Claude 3.5 Sonnet)</option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-300">مفتاح API Key المخصص (اختياري):</label>
+          <input type="password" id="api-key-input" placeholder="AIzaSy... / sk-..." class="w-full px-4 py-3 rounded-xl bg-dark-panel2 border border-dark-border text-white text-sm focus:outline-none focus:border-brand-500 font-mono">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button onclick="window.NoviQ.closeApiModal()" class="px-5 py-2.5 rounded-xl bg-dark-panel2 border border-dark-border text-slate-300 text-xs font-bold">إلغاء</button>
+        <button onclick="window.NoviQ.saveApiSettings()" class="px-6 py-2.5 rounded-xl bg-brand-500 text-slate-950 font-extrabold text-xs">حفظ التغييرات</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTI-PAGE APPLICATION CONTROLLER -->
+  <script>
+    class NoviQApp {
+      constructor() {
+        this.lang = localStorage.getItem('noviq_lang') || 'ar';
+        this.theme = localStorage.getItem('noviq_theme') || 'dark';
+        this.apiConfig = JSON.parse(localStorage.getItem('noviq_api_config') || '{"provider":"gemini","key":""}');
+        
+        this.currentPage = 'landing';
+        this.user = null;
+        this.userId = null;
+        this.state = this.getBlankState();
+        this.obState = { step: 1, subject: 'Programming', topic: 'Python', goal: 'foundations', minutes: 30 };
+
+        this.initFirebase();
+      }
+
+      getBlankState() {
+        return {
+          profile: null,
+          assessment: null,
+          lessons: [],
+          skills: {},
+          mistakes: [],
+          activity: [],
+          xp: 0,
+          chat: []
+        };
+      }
+
+      async initFirebase() {
+        const boot = async () => {
+          const { auth, onAuthStateChanged, signInAnonymously } = window.FB;
+
+          onAuthStateChanged(auth, async (user) => {
+            if (user) {
+              this.user = user;
+              this.userId = user.uid;
+            } else {
+              try {
+                const cred = await signInAnonymously(auth);
+                this.user = cred.user;
+                this.userId = cred.user.uid;
+              } catch(e) {
+                this.userId = 'anon_' + Math.random().toString(36).substring(2, 9);
+              }
+            }
+            this.updateAuthHeader();
+            this.subscribeUserFirestore();
+          });
+        };
+
+        if (window.FB) boot();
+        else window.addEventListener('firebase-ready', boot);
+      }
+
+      subscribeUserFirestore() {
+        if (!this.userId || !window.FB) return;
+        const { db, doc, onSnapshot } = window.FB;
+
+        const profileRef = doc(db, 'artifacts', window.FB.appId, 'users', this.userId, 'data', 'user_profile');
+
+        onSnapshot(profileRef, (snap) => {
+          if (snap.exists()) {
+            this.state = Object.assign(this.getBlankState(), snap.data());
+          }
+          this.applyLangAndTheme();
+          this.render();
+        }, (err) => {
+          this.applyLangAndTheme();
+          this.render();
+        });
+      }
+
+      async saveStateToFirestore() {
+        if (!this.userId || !window.FB) return;
+        const { db, doc, setDoc } = window.FB;
+        const profileRef = doc(db, 'artifacts', window.FB.appId, 'users', this.userId, 'data', 'user_profile');
+        try {
+          await setDoc(profileRef, Object.assign({}, this.state, { updatedAt: Date.now() }), { merge: true });
+        } catch(e) {
+          console.error("Firestore Save Error:", e);
+        }
+      }
+
+      navigate(page, params = {}) {
+        this.currentPage = page;
+        this.pageParams = params;
+        this.render();
+        window.scrollTo(0, 0);
+      }
+
+      applyLangAndTheme() {
+        const isAr = this.lang === 'ar';
+        document.documentElement.lang = this.lang;
+        document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+
+        if (this.theme === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+          document.body.className = "bg-light-bg text-slate-900 font-ar antialiased min-h-screen transition-colors duration-300";
+          const icon = document.getElementById('theme-btn-icon');
+          if (icon) icon.textContent = '☀️';
+        } else {
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
+          document.body.className = "bg-dark-bg text-slate-200 font-ar antialiased min-h-screen transition-colors duration-300";
+          const icon = document.getElementById('theme-btn-icon');
+          if (icon) icon.textContent = '🌙';
+        }
+
+        const langText = document.getElementById('lang-btn-text');
+        if (langText) langText.textContent = isAr ? 'English' : 'العربية';
+      }
+
+      toggleLanguage() {
+        this.lang = this.lang === 'ar' ? 'en' : 'ar';
+        localStorage.setItem('noviq_lang', this.lang);
+        this.applyLangAndTheme();
+        this.render();
+      }
+
+      toggleTheme() {
+        this.theme = this.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('noviq_theme', this.theme);
+        this.applyLangAndTheme();
+      }
+
+      updateAuthHeader() {
+        const isAr = this.lang === 'ar';
+        const wrap = document.getElementById('auth-header-btn-wrap');
+        if (!wrap) return;
+
+        if (this.user && !this.user.isAnonymous) {
+          const name = this.user.displayName || 'User';
+          const photo = this.user.photoURL;
+
+          wrap.innerHTML = `
+            <div class="flex items-center gap-2 bg-dark-panel2 border border-dark-border rounded-xl p-1 pr-2.5">
+              ${photo ? `<img src="${photo}" class="w-6 h-6 rounded-full object-cover">` : '<span class="text-xs">👤</span>'}
+              <span class="text-xs font-bold text-slate-200 max-w-[90px] truncate">${name}</span>
+              <button onclick="window.NoviQ.signOutUser()" class="px-2 py-1 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 text-[11px] font-bold">
+                ${isAr ? 'خروج' : 'Sign Out'}
+              </button>
+            </div>
+          `;
+        } else {
+          wrap.innerHTML = `
+            <button onclick="window.NoviQ.openAuthModal()" class="px-3.5 py-1.5 rounded-xl bg-brand-500 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-md hover:bg-brand-400">
+              <span>👤</span>
+              <span>${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
+            </button>
+          `;
+        }
+      }
+
+      openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
+      closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+
+      async signInWithGoogle() {
+        if (!window.FB) return;
+        const { auth, signInWithPopup, googleProvider } = window.FB;
+        try {
+          await signInWithPopup(auth, googleProvider);
+          this.closeAuthModal();
+        } catch(e) {
+          alert('Google Sign-In error: ' + e.message);
+        }
+      }
+
+      async signInWithEmail(isSignUp = false) {
+        if (!window.FB) return;
+        const { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.FB;
+        const email = document.getElementById('auth-email-input').value.trim();
+        const pass = document.getElementById('auth-pass-input').value.trim();
+
+        try {
+          if (isSignUp) await createUserWithEmailAndPassword(auth, email, pass);
+          else await signInWithEmailAndPassword(auth, email, pass);
+          this.closeAuthModal();
+        } catch(e) {
+          alert(e.message);
+        }
+      }
+
+      async signOutUser() {
+        if (!window.FB) return;
+        const { auth, signOut, signInAnonymously } = window.FB;
+        await signOut(auth);
+        await signInAnonymously(auth);
+      }
+
+      openApiModal() { document.getElementById('api-modal').classList.remove('hidden'); }
+      closeApiModal() { document.getElementById('api-modal').classList.add('hidden'); }
+      saveApiSettings() {
+        const provider = document.getElementById('api-provider-select').value;
+        const key = document.getElementById('api-key-input').value.trim();
+        this.apiConfig = { provider, key };
+        localStorage.setItem('noviq_api_config', JSON.stringify(this.apiConfig));
+        this.closeApiModal();
+      }
+
+      async callGeminiAPI(query, systemInstruction = "") {
+        const apiKey = this.apiConfig.key || "AIzaSyAZ3JJwZSDuzfaZhuCG63yzva_ILlCzL1o";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+        const payload = {
+          contents: [{ parts: [{ text: query }] }],
+          systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined
+        };
+
+        try {
+          const resp = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await resp.json();
+          return data?.candidates?.[0]?.content?.parts?.[0]?.text || this.fallbackResponse(query);
+        } catch(e) {
+          return this.fallbackResponse(query);
+        }
+      }
+
+      fallbackResponse(query) {
+        const isAr = this.lang === 'ar';
+        return isAr ? 
+          "### الشرح المباشر 💡\nمرحباً بك! هُنا شرح مبسط وتطبيقي يناسب مستواك.\n\n### مثال تطبيقي 💻\n```python\n# تنفيذ كود معتمد\ndef execute_task():\n    return 'NoviQ AI Success'\n```" :
+          "### Direct Concept Breakdown 💡\nWelcome! Here is a simple breakdown tailored to your level.\n\n### Code Example 💻\n```python\ndef execute_task():\n    return 'NoviQ AI Success'\n```";
+      }
+
+      render() {
+        const root = document.getElementById('view-root');
+        if (!root) return;
+
+        switch (this.currentPage) {
+          case 'landing': root.innerHTML = this.pageLanding(); break;
+          case 'dashboard': root.innerHTML = this.pageDashboard(); break;
+          case 'plan': root.innerHTML = this.pagePlan(); break;
+          case 'lesson': this.renderLessonPage(root); break;
+          case 'drill': this.renderDrillPage(root); break;
+          case 'practice': root.innerHTML = this.pagePractice(); break;
+          case 'tutor': this.renderTutorPage(root); break;
+          case 'research': root.innerHTML = this.pageResearch(); break;
+          default: root.innerHTML = this.pageLanding();
+        }
+      }
+
+      pageLanding() {
+        const isAr = this.lang === 'ar';
+        return `
+          <div class="space-y-16 py-8">
+            <div class="text-center space-y-6 max-w-3xl mx-auto">
+              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-bold">
+                🚀 ${isAr ? 'منصة التعلّم التكيفي بالذكاء الاصطناعي' : 'Adaptive AI Learning SaaS Engine'}
+              </div>
+              <h1 class="text-3xl sm:text-5xl font-black text-white leading-tight">
+                ${isAr ? 'تعلم أي مجال بخطة مخصصة لمستواك ووقتك' : 'Master Any Skill with AI Tailored to Your Schedule'}
+              </h1>
+              <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
+                ${isAr ? 'تعتمد منصة NoviQ AI على توليد مسارات تعليمية تفاعلية، تشخيص نقاط الضعف، وتقديم دروس وشروحات مبسطة تتكيف باستمرار مع تقدمك.' : 'NoviQ AI generates dynamic personalized learning paths, identifies skill gaps, and continuously adapts content.'}
+              </p>
+
+              <div class="flex flex-wrap justify-center gap-4 pt-4">
+                <button onclick="window.NoviQ.startOnboarding()" class="px-8 py-4 rounded-2xl bg-brand-500 text-slate-950 font-black text-sm shadow-xl shadow-brand-500/20 hover:bg-brand-400">
+                  ${isAr ? 'ابدأ خطتك التعليمية الآن ←' : 'Start Your Personal Path →'}
+                </button>
+                <button onclick="window.NoviQ.navigate('research')" class="px-6 py-4 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-bold text-sm">
+                  📊 ${isAr ? 'مشكلة البحث والرؤية' : 'Research Problem & Vision'}
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="p-6 rounded-2xl bg-dark-panel border border-dark-border space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center font-bold text-lg">🎯</div>
+                <h3 class="font-bold text-lg text-white">${isAr ? 'تقييم تشخيصي متكيف' : 'Adaptive Benchmark'}</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">${isAr ? 'يقيس المحرك الذكي مستواك الفعلي عبر أسئلة متدرجة يبنى عليها مسارك.' : 'Measures your true baseline and generates tailored diagnostic quizzes.'}</p>
+              </div>
+
+              <div class="p-6 rounded-2xl bg-dark-panel border border-dark-border space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">⚡</div>
+                <h3 class="font-bold text-lg text-white">${isAr ? 'سجل أخطاء وتدريب مكثف' : 'Mistake Vault'}</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">${isAr ? 'تُحفظ الأخطاء تلقائياً لتوليد تمارين مركزة على نقاط الضعف.' : 'Auto-logs missed quiz options to continuously drill weak skill areas.'}</p>
+              </div>
+
+              <div class="p-6 rounded-2xl bg-dark-panel border border-dark-border space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-lg">💬</div>
+                <h3 class="font-bold text-lg text-white">${isAr ? 'معلم ذكي خاص' : 'Context-Aware AI Tutor'}</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">${isAr ? 'مساعد تفاعلي يعرف مستواك ويشرح المفاهيم الصعبة خطوة بخطوة.' : 'Interactive AI assistant tracking your current level and weakness areas.'}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      startOnboarding() {
+        this.state = this.getBlankState();
+        this.saveStateToFirestore();
+        this.navigate('dashboard');
+      }
+
+      pageDashboard() {
+        const isAr = this.lang === 'ar';
+        if (!this.state.profile) return this.pageOnboardingView();
+
+        const doneCount = this.state.lessons.filter(l => l.status === 'done').length;
+        const totalCount = this.state.lessons.length;
+        const pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
+        const nextLes = this.state.lessons.find(l => l.status !== 'done') || this.state.lessons[0];
+
+        return `
+          <div class="space-y-6">
+            <div class="bg-gradient-to-r from-dark-panel to-dark-panel2 border border-brand-500/30 rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col md:flex-row justify-between items-center gap-6">
+              <div class="space-y-2 max-w-xl">
+                <span class="px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold">⚡ ${isAr ? 'الدرس التالي' : 'Next Lesson'}</span>
+                <h1 class="text-2xl font-extrabold text-white">${nextLes ? nextLes.title : ''}</h1>
+                <p class="text-xs text-slate-300 leading-relaxed">${nextLes ? nextLes.objective : ''}</p>
+              </div>
+
+              <button onclick="window.NoviQ.navigate('lesson', { id: '${nextLes ? nextLes.id : ''}' })" class="px-6 py-3.5 rounded-2xl bg-brand-500 text-slate-950 font-extrabold text-sm shadow-lg hover:bg-brand-400">
+                ${isAr ? 'ابدأ الدرس الان ←' : 'Start Lesson Now →'}
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="bg-dark-panel border border-dark-border rounded-2xl p-5 flex items-center gap-4">
+                <div class="font-black text-2xl text-brand-400">${pct}%</div>
+                <div>
+                  <h3 class="text-xs text-slate-400 font-bold uppercase">${isAr ? 'إنجاز الخطة' : 'Path Completion'}</h3>
+                  <p class="text-sm font-bold text-white">${doneCount} / ${totalCount} ${isAr ? 'دروس' : 'Lessons'}</p>
+                </div>
+              </div>
+
+              <div class="bg-dark-panel border border-dark-border rounded-2xl p-5 flex items-center gap-4">
+                <div class="font-black text-2xl text-amber-400">⚡ ${Math.max(1, this.state.activity ? this.state.activity.length : 1)}</div>
+                <div>
+                  <h3 class="text-xs text-slate-400 font-bold uppercase">${isAr ? 'سلسلة الأيام' : 'Active Streak'}</h3>
+                  <p class="text-sm font-bold text-white">${isAr ? 'أيام متتالية' : 'Consecutive Days'}</p>
+                </div>
+              </div>
+
+              <div class="bg-dark-panel border border-dark-border rounded-2xl p-5 flex items-center gap-4">
+                <div class="font-black text-2xl text-indigo-400">${this.state.xp || 0}</div>
+                <div>
+                  <h3 class="text-xs text-slate-400 font-bold uppercase">Total XP</h3>
+                  <p class="text-sm font-bold text-white">${isAr ? 'نقاط خبرة' : 'Experience Points'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      pageOnboardingView() {
+        const isAr = this.lang === 'ar';
+        return `
+          <div class="max-w-2xl mx-auto py-8">
+            <div class="bg-dark-panel border border-dark-border rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+              <h1 class="text-2xl font-extrabold text-white">${isAr ? 'ما الموضوع الذي تريد إتقانه اليوم؟' : 'What Subject Do You Want to Master?'}</h1>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                ${[
+                  { name: 'البرمجة والتطوير', key: 'Programming' },
+                  { name: 'اللغات والترجمة', key: 'Languages' },
+                  { name: 'الرياضيات والإحصاء', key: 'Math' },
+                  { name: 'العلوم والتكنولوجيا', key: 'Science' }
+                ].map(s => `
+                  <button onclick="window.NoviQ.obState.subject = '${s.key}'; window.NoviQ.obState.topic = '${s.name}'; window.NoviQ.completeOnboarding();" class="p-4 rounded-2xl border border-dark-border bg-dark-panel2 text-start font-bold text-white hover:border-brand-500">
+                    ${s.name}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      async completeOnboarding() {
+        const isAr = this.lang === 'ar';
+        this.state = {
+          profile: { subject: this.obState.subject, topic: this.obState.topic, goal: 'foundations', minutes: 30 },
+          assessment: { level: 'Beginner', summary: 'Path constructed.' },
+          lessons: [
+            { id: 'l1', title: (isAr ? 'أساسيات ' : 'Core Principles of ') + this.obState.topic, objective: 'Master fundamentals', skill: 'Foundations', minutes: 20, status: 'in_progress' },
+            { id: 'l2', title: (isAr ? 'التطبيق العملي لـ ' : 'Practical Implementation of ') + this.obState.topic, objective: 'Hands-on practice', skill: 'Application', minutes: 20, status: 'todo' }
+          ],
+          skills: { 'Foundations': { score: 50 } },
+          mistakes: [],
+          activity: [{ date: '2026-10-28', mins: 20 }],
+          xp: 50,
+          chat: []
+        };
+        await this.saveStateToFirestore();
+        this.render();
+      }
+
+      pagePlan() {
+        const isAr = this.lang === 'ar';
+        return `
+          <div class="space-y-6">
+            <h1 class="text-2xl font-extrabold text-white">${isAr ? 'مسار التعلم المخصص' : 'Custom Curriculum Path'}</h1>
+            <div class="space-y-3">
+              ${(this.state.lessons || []).map((les, idx) => `
+                <div class="p-5 rounded-2xl border border-dark-border bg-dark-panel flex justify-between items-center gap-4">
+                  <div class="space-y-1">
+                    <h3 class="font-bold text-white text-base">${les.title}</h3>
+                    <p class="text-xs text-slate-400">${les.objective}</p>
+                  </div>
+                  <button onclick="window.NoviQ.navigate('lesson', { id: '${les.id}' })" class="px-4 py-2 rounded-xl bg-brand-500 text-slate-950 font-bold text-xs">
+                    ${les.status === 'done' ? (isAr ? 'مراجعة' : 'Review') : (isAr ? 'ابدأ' : 'Start')}
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      async renderLessonPage(container) {
+        const isAr = this.lang === 'ar';
+        const les = (this.state.lessons || []).find(l => l.id === this.pageParams.id) || this.state.lessons[0];
+
+        if (!les.content) {
+          container.innerHTML = `<div class="py-16 text-center text-brand-400 font-bold">جاري توليد الشرح بالذكاء الاصطناعي...</div>`;
+          les.content = await this.callGeminiAPI(`Explain topic: ${les.title}`);
+          await this.saveStateToFirestore();
+        }
+
+        container.innerHTML = `
+          <div class="max-w-3xl mx-auto space-y-6">
+            <div class="bg-dark-panel border border-dark-border rounded-3xl p-6 sm:p-8 space-y-6">
+              <h1 class="text-2xl font-extrabold text-white">${les.title}</h1>
+              <div class="prose max-w-none text-slate-200 text-sm leading-relaxed">
+                ${les.content.replace(/### (.*)/g, '<h3 class="text-brand-400 font-bold text-lg mt-4">$1</h3>').replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')}
+              </div>
+              <button onclick="window.NoviQ.completeLesson('${les.id}')" class="px-6 py-3 rounded-xl bg-brand-500 text-slate-950 font-bold text-sm">
+                ${isAr ? 'إكمال الدرس واختبار الفهم' : 'Complete Lesson'}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      async completeLesson(id) {
+        const les = this.state.lessons.find(l => l.id === id);
+        if (les) les.status = 'done';
+        this.state.xp = (this.state.xp || 0) + 30;
+        await this.saveStateToFirestore();
+        this.navigate('drill', { skill: les ? les.skill : 'General' });
+      }
+
+      async renderDrillPage(container) {
+        const isAr = this.lang === 'ar';
+        const skill = this.pageParams.skill || 'Foundations';
+
+        container.innerHTML = `
+          <div class="max-w-2xl mx-auto py-8">
+            <div class="bg-dark-panel border border-dark-border rounded-3xl p-6 space-y-6">
+              <h1 class="text-xl font-bold text-white">${isAr ? 'تمرين تشخيصي لمفهوم: ' : 'Diagnostic Drill: '}${skill}</h1>
+              <p class="text-sm text-slate-300">أي الأساليب التالية يعتبر الأفضل لإتقان التطبيق البرمجي؟</p>
+              
+              <div class="space-y-2">
+                <button onclick="window.NoviQ.finishDrill(true, '${skill}')" class="w-full p-4 rounded-xl bg-dark-panel2 border border-dark-border text-start text-sm font-bold text-slate-200 hover:border-brand-500">
+                  كتابة كود شفاف وموثق وتجربته بيدك
+                </button>
+                <button onclick="window.NoviQ.finishDrill(false, '${skill}')" class="w-full p-4 rounded-xl bg-dark-panel2 border border-dark-border text-start text-sm font-bold text-slate-200 hover:border-red-500">
+                  حفظ التعريفات دون تطبيق
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      async finishDrill(isRight, skill) {
+        if (isRight) {
+          this.state.xp = (this.state.xp || 0) + 20;
+        } else {
+          if (!this.state.mistakes) this.state.mistakes = [];
+          this.state.mistakes.unshift({ q: `سؤال مهارة ${skill}`, why: 'يحتاج تركيز على التطبيق العملي', skill });
+        }
+        await this.saveStateToFirestore();
+        this.navigate('practice');
+      }
+
+      pagePractice() {
+        const isAr = this.lang === 'ar';
+        return `
+          <div class="space-y-6">
+            <h1 class="text-2xl font-extrabold text-white">${isAr ? 'سجل الأخطاء والتمارين (Mistake Vault)' : 'Practice & Mistake Vault'}</h1>
+            <div class="bg-dark-panel border border-dark-border rounded-2xl p-6 space-y-4">
+              ${(!this.state.mistakes || this.state.mistakes.length === 0) ? `<p class="text-sm text-slate-400">${isAr ? 'لا توجد أخطاء مسجلة حالياً.' : 'No logged mistakes yet.'}</p>` : `
+                <div class="space-y-3">
+                  ${this.state.mistakes.map(m => `
+                    <div class="p-4 rounded-xl bg-dark-panel2 border border-dark-border space-y-1">
+                      <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 text-xs font-bold">${m.skill}</span>
+                      <p class="text-sm font-semibold text-white">${m.q}</p>
+                      <p class="text-xs text-slate-400">${m.why}</p>
+                    </div>
+                  `).join('')}
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      }
+
+      renderTutorPage(container) {
+        const isAr = this.lang === 'ar';
+        container.innerHTML = `
+          <div class="max-w-3xl mx-auto flex flex-col h-[calc(100vh-10rem)]">
+            <div class="bg-dark-panel border border-dark-border rounded-t-3xl p-4 flex justify-between items-center">
+              <h2 class="font-bold text-white text-sm">🤖 ${isAr ? 'المعلم الذكي الخاص' : 'AI Private Tutor'}</h2>
+            </div>
+            
+            <div id="chat-box" class="flex-1 bg-dark-panel/50 border-x border-dark-border p-4 overflow-y-auto space-y-3">
+              ${(this.state.chat || []).map(c => `
+                <div class="flex ${c.sender === 'user' ? 'justify-end' : 'justify-start'}">
+                  <div class="p-3 rounded-2xl ${c.sender === 'user' ? 'bg-brand-500 text-slate-950 font-bold' : 'bg-dark-panel2 text-slate-200 border border-dark-border'} max-w-lg text-sm">
+                    ${c.text}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="bg-dark-panel border border-dark-border rounded-b-3xl p-3 flex gap-2">
+              <input type="text" id="tutor-in" placeholder="${isAr ? 'اكتب سؤالك هنا...' : 'Ask a question...'}" onkeydown="if(event.key==='Enter') window.NoviQ.sendTutorMsg()" class="flex-1 px-4 py-2.5 rounded-xl bg-dark-panel2 border border-dark-border text-white text-sm">
+              <button onclick="window.NoviQ.sendTutorMsg()" class="px-5 py-2.5 rounded-xl bg-brand-500 text-slate-950 font-bold text-sm">إرسال</button>
+            </div>
+          </div>
+        `;
+      }
+
+      async sendTutorMsg() {
+        const inp = document.getElementById('tutor-in');
+        if (!inp || !inp.value.trim()) return;
+        const text = inp.value.trim();
+        inp.value = '';
+
+        if (!this.state.chat) this.state.chat = [];
+        this.state.chat.push({ sender: 'user', text });
+        this.render();
+
+        const reply = await this.callGeminiAPI(text);
+        this.state.chat.push({ sender: 'ai', text: reply });
+        await this.saveStateToFirestore();
+        this.render();
+      }
+
+      pageResearch() {
+        const isAr = this.lang === 'ar';
+        return `
+          <div class="max-w-3xl mx-auto space-y-8 py-6">
+            <div class="bg-gradient-to-r from-indigo-950 to-dark-panel border border-indigo-500/30 rounded-3xl p-6 sm:p-8 space-y-4">
+              <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold">📚 EdTech Research Problem Context</span>
+              <h1 class="text-2xl sm:text-3xl font-extrabold text-white">${isAr ? 'مشكلة البحث والرؤية لمشروع NoviQ AI' : 'Research Problem Statement & Vision'}</h1>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                ${isAr ? 'يعاني كثير من المتعلمين من صعوبة الوصول إلى تجربة تعليمية تناسب مستواهم وأهدافهم والوقت المتاح لهم؛ لأن المحتوى التعليمي موحّد. توفر NoviQ AI حلاً متكيفاً عبر الذكاء الاصطناعي.' : 'Learners struggle with uniform non-adaptive online courses. NoviQ AI provides a personalized dynamic path.'}
+              </p>
+            </div>
+
+            <div class="bg-dark-panel border border-indigo-500/30 rounded-3xl p-6 space-y-4">
+              <h2 class="text-lg font-bold text-white">${isAr ? 'استبيان البحث المباشر (تسجيل البيانات بـ Firestore)' : 'Live Research Survey'}</h2>
+              
+              <div id="survey-box" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">${isAr ? 'هل تواجه صعوبة في المتابعة في الكورسات المسجلة؟' : 'Do you drop out of traditional courses?'}</label>
+                  <select id="s-q1" class="w-full px-4 py-2.5 rounded-xl bg-dark-panel2 border border-dark-border text-white text-sm">
+                    <option value="yes">${isAr ? 'نعم، أتوقف بسبب الملل أو عدم التناسب' : 'Yes, frequently'}</option>
+                    <option value="no">${isAr ? 'لا، أتابعتها بشكل ممتاز' : 'No, I finish them'}</option>
+                  </select>
+                </div>
+
+                <button onclick="window.NoviQ.submitSurvey()" class="px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs">
+                  ${isAr ? 'إرسال بيانات الاستبيان إلى Firestore' : 'Submit Research Data'}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      async submitSurvey() {
+        const isAr = this.lang === 'ar';
+        if (window.FB) {
+          const { db, collection, addDoc } = window.FB;
+          const surveysCol = collection(db, 'artifacts', window.FB.appId, 'public', 'data', 'research_surveys');
+          try {
+            await addDoc(surveysCol, {
+              q1: document.getElementById('s-q1').value,
+              userId: this.userId,
+              timestamp: Date.now()
+            });
+            document.getElementById('survey-box').innerHTML = `
+              <div class="p-4 rounded-xl bg-emerald-500/10 text-emerald-400 font-bold text-sm">
+                ${isAr ? 'تم حفظ إجابتك بنجاح في Firestore! شكراً لمشاركتك البحثية.' : 'Response logged to Firestore! Thank you.'}
+              </div>
+            `;
+          } catch(e) {
+            console.error(e);
+          }
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      window.NoviQ = new NoviQApp();
+    });
+  </script>
+</body>
+</html>
